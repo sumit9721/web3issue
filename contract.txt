@@ -1,0 +1,738 @@
+//SPDX-License-Identifier: UNLICENSED
+
+pragma solidity >=0.4.22 <0.9.0;
+
+contract medRec {
+    uint256 public pindex = 0;
+    uint256 public dindex = 0;
+    uint256 public phindex = 0;
+    uint256 public lindex = 0;
+    uint256 public iindex = 0;
+    uint256 public rindex = 0;
+
+    struct Records {
+        string uName;
+        string reason;
+        string visitedDate;
+        string summary;
+        //string ipfs;
+    }
+
+    struct patient {
+        uint256 id;
+        string name;
+        string phone;
+        string gender;
+        string dob;
+        //string bloodgroup;
+        Records[] records;
+        address addr;
+        string password;
+    }
+
+    struct doctor {
+        uint256 id;
+        string name;
+        string contact;
+        string hname;
+        string faculty;
+        address addr;
+        uint256 licenseno;
+        //bool isApproved;
+    }
+
+
+    struct pharmacy {
+        uint256 id;
+        string name;
+        string contact;
+        string location;
+        address addr;
+        uint256 licenseno;
+        //bool isApproved;
+    }
+
+    struct laboratory {
+        uint256 id;
+        string name;
+        string contact;
+        string location;
+        address addr;
+        uint256 licenseno;
+        //bool isApproved;
+    }
+
+    struct insurance {
+        uint256 id;
+        string name;
+        string contact;
+        string location;
+        address addr;
+        uint256 licenseno;
+        //bool isApproved;
+    }
+
+    struct researcher {
+        uint256 id;
+        string name;
+        string contact;
+        string affiliation;
+        address addr;
+        uint256 licenseno;
+        bool isApproved;
+    }
+
+   // Private state variable
+    address public owner;
+  
+    // Defining a constructor   
+    constructor() {   
+        owner = msg.sender;
+    }
+  
+    // Function to get 
+    // address of owner
+    function getOwner() public view returns (address) {    
+        return owner;
+    }
+    
+    
+
+    mapping(address => patient) patients;
+    mapping(address => doctor) doctors;
+    mapping(address => pharmacy) pharmacies;
+    mapping(address => laboratory) laboratories;
+    mapping(address => insurance) insurances;
+    mapping(address => researcher) researchers;
+  
+    mapping(address => bool) isPatient;
+    mapping(address => bool) isDoctor;
+    mapping(address => bool) isPharmacy;
+    mapping(address => bool) isLaboratory;
+    mapping(address => bool) isInsurance;
+    mapping(address => bool) isResearcher;
+    
+    mapping(address => mapping(address => bool)) Authorized;
+    
+    mapping(address => bool) public loggedIn; //For LogIn and LogOut
+    
+    /*mapping(string => mapping(uint256 => bool)) Registered;
+    mapping(string => mapping(string => bool)) RegisteredP;*/
+
+    /*address[] private patientList;
+    address[] public doctorList;
+    address[] public pharmacyList;
+    address[] public laboratoryList;
+    address[] public insuranceList;
+    address[] public researcherList;*/
+
+    /*uint256[] public registeredDoctorList;
+    uint256[] public registeredPharmacyList;
+    uint256[] public registeredLaboratoryList;
+    uint256[] public registeredInsuranceList;
+    uint256[] public registeredResearcherList;*/
+
+
+
+
+    event PatientLogIn(address indexed patientAddress, string name);
+    //event PatientLogOut(address indexed patientAddress, string name);
+    event DoctorLogIn(address indexed doctorAddress, string name);
+    //event DoctorLogOut(address indexed doctorAddress, string name);
+    event PharmacyLogIn(address indexed pharmacyAddress, string name);
+    //event PharmacyLogOut(address indexed pharmacyAddress, string name);
+    event LaboratoryLogIn(address indexed laboratoryAddress, string name);
+    //event LaboratoryLogOut(address indexed laboratoryAddress, string name);
+    event InsuranceLogIn(address indexed insuranceAddress, string name);
+    //event InsuranceLogOut(address indexed insuranceAddress, string name);
+    event ResearcherLogIn(address indexed researcherAddress, string name);
+    //event ResearcherLogOut(address indexed researcherAddress, string name);
+    event LogOut(address indexed Address);
+
+
+
+
+
+    function isAuthorized(
+        address pat,
+        address entity
+    ) public view returns (bool success) {
+        return Authorized[pat][entity];
+    }
+   
+
+    //add the patient to the blockchain
+    function addPatient(
+        string memory _name,
+        string memory _phone,
+        string memory _gender,
+        string memory _dob,
+        //string memory _bloodgroup,
+        string memory _password
+    ) public {
+        require(!isPatient[msg.sender], "E");
+        require(bytes(_name).length > 0);
+        require(bytes(_phone).length > 0);
+        require(bytes(_gender).length > 0);
+        require(bytes(_dob).length > 0);
+        address _addr =msg.sender;
+        
+        pindex = pindex + 1;
+        isPatient[_addr] = true;
+        patients[_addr].id = pindex;
+        patients[_addr].name = _name;
+        patients[_addr].phone = _phone;
+        patients[_addr].gender = _gender;
+        patients[_addr].dob = _dob;
+        //patients[_addr].bloodgroup = _bloodgroup;
+        patients[_addr].password = _password;
+        patients[_addr].addr = _addr;
+
+        //patientList.push(msg.sender);
+    }
+
+    //get the details of the patients using eth-address
+    function getPatientDetails()
+        public
+        view
+        returns (
+            string memory _name,
+            string memory _phone,
+            string memory _gender,
+            string memory _dob
+            //string memory _bloodgroup
+        )
+    {
+        require(isPatient[msg.sender], "E");
+        //patient memory pat = patients[_addr];
+        return (patients[msg.sender].name, patients[msg.sender].phone, patients[msg.sender].gender, patients[msg.sender].dob);
+    }
+
+    //add doctor
+    function addDoctor(
+        string memory _name,
+        uint256 license,
+        string memory _hname,
+        string memory _faculty,
+        string memory _contact
+        
+    ) public {
+        require(!isDoctor[msg.sender], "R");
+        require(
+            msg.sender != owner,
+            "U"
+        );
+        require(bytes(_name).length > 0);
+        require(bytes(_hname).length > 0);
+        require(bytes(_faculty).length > 0);
+        require(bytes(_contact).length > 0);
+        require(license > 0);
+        address _addr = msg.sender;
+        
+
+        dindex = dindex + 1;
+        isDoctor[_addr] = true;
+        doctors[_addr].id = dindex;
+        doctors[_addr].name = _name;
+        doctors[_addr].licenseno = license;
+        doctors[_addr].contact = _contact;
+        doctors[_addr].hname = _hname;
+        doctors[_addr].faculty = _faculty;
+        doctors[_addr].addr = _addr;
+        //doctors[_addr].isApproved = true;
+
+        //doctorList.push(_addr);
+        //registeredDoctorList.push(license);
+
+    }
+
+    //get doctors detail using eth-address
+    function getDoctorDetails(
+    )
+        public
+        view
+        returns (
+            uint256 id,
+            string memory name,
+            uint256 licenseno,
+            string memory hname,
+            string memory faculty,
+            string memory contact,
+            address addr
+            //bool isApproved
+            
+        )
+    {
+        // require(doctors[_address].isApproved,"Doctor is not Approved or doesn't exist");
+        doctor memory doc = doctors[msg.sender];
+        return (
+            doc.id,
+            doc.name,
+            doc.licenseno,
+            doc.hname,
+            doc.faculty,
+            doc.contact,
+            doc.addr
+            //doc.isApproved
+            
+        );
+    }
+
+
+
+
+    //add pharmacy
+    function addPharmacy(
+        string memory _name,
+        string memory _location,
+        string memory _contact,
+        uint256 license
+    ) public {
+        require(!isPharmacy[msg.sender], "R");
+        require(
+            msg.sender != owner,
+            "U"
+        );
+        require(bytes(_name).length > 0);
+        require(bytes(_contact).length > 0);
+        require(license > 0);
+        address _addr = msg.sender;
+
+        phindex = phindex + 1;
+        isPharmacy[_addr] = true;
+        pharmacies[_addr].id = phindex;
+        pharmacies[_addr].name = _name;
+        pharmacies[_addr].contact = _contact;
+        pharmacies[_addr].location = _location;
+        pharmacies[_addr].addr = _addr;
+        pharmacies[_addr].licenseno = license;
+        //pharmacies[_addr].isApproved = false;
+
+        //pharmacyList.push(_addr);
+        //registeredPharmacyList.push(license);
+
+    }
+
+    //get pharmacy details using eth address
+    function getPharmacyDetails(
+    )
+        public
+        view
+        returns (
+            uint256 id,
+            string memory name,
+            string memory contact,
+            address addr,
+            //bool isApproved,
+            string memory location,
+            uint256 licenseno
+        )
+    {
+        pharmacy memory pharm = pharmacies[msg.sender];
+        return (
+            pharm.id,
+            pharm.name,
+            pharm.contact,
+            pharm.addr,
+            //pharm.isApproved,
+            pharm.location,
+            pharm.licenseno
+        );
+    }
+
+
+    //add laboratory
+    function addLaboratory(
+        string memory _name,
+        string memory _location,
+        string memory _contact,
+        uint256 license
+    ) public {
+        require(!isLaboratory[msg.sender], "R");
+        require(
+            msg.sender != owner,
+            "U"
+        );
+        require(bytes(_name).length > 0);
+        require(bytes(_contact).length > 0);
+        require(license > 0);
+        address _addr = msg.sender;
+
+        lindex = lindex + 1;
+        isLaboratory[_addr] = true;
+        laboratories[_addr].id = lindex;
+        laboratories[_addr].name = _name;
+        laboratories[_addr].contact = _contact;
+        laboratories[_addr].location = _location;
+        laboratories[_addr].addr = _addr;
+        laboratories[_addr].licenseno = license;
+        //laboratories[_addr].isApproved = false;
+
+        //laboratoryList.push(_addr);
+        //registeredLaboratoryList.push(license);
+
+    }
+
+
+    //get laboratory details using eth address
+    function getLaboratoryDetails(
+    )
+        public
+        view
+        returns (
+            uint256 id,
+            string memory name,
+            string memory contact,
+            string memory location,
+            address addr,
+            uint256 licenseno
+            //bool isApproved
+        )
+    {
+        laboratory memory lab = laboratories[msg.sender];
+        return (
+            lab.id,
+            lab.name,
+            lab.contact,
+            lab.location,
+            lab.addr,
+            lab.licenseno
+            //lab.isApproved
+        );
+    }
+
+    
+
+    //add insurance company
+    function addInsurance(
+        string memory _name,
+        string memory _location,
+        string memory _contact,
+        uint256 license
+    ) public {
+        require(!isInsurance[msg.sender], "R");
+        require(
+            msg.sender != owner,
+            "U"
+        );
+        require(bytes(_name).length > 0);
+        require(bytes(_contact).length > 0);
+        require(license > 0);
+        address _addr = msg.sender;
+        
+
+        iindex = iindex + 1;
+        isInsurance[_addr] = true;
+        insurances[_addr].id = iindex;
+        insurances[_addr].name = _name;
+        insurances[_addr].contact = _contact;
+        insurances[_addr].location = _location;
+        insurances[_addr].addr = _addr;
+        insurances[_addr].licenseno = license;
+        //insurances[_addr].isApproved = true;
+
+        //insuranceList.push(_addr);
+        //registeredInsuranceList.push(license);
+    }
+
+
+    
+
+    //get insurance company details using eth address
+    function getInsuranceDetails(
+        address _address
+    )
+        public
+        view
+        returns (
+            uint256 id,
+            string memory name,
+            string memory contact,
+            string memory location,
+            address addr,
+            uint256 licenseno
+            //bool isApproved
+        )
+    {
+        insurance memory ins = insurances[_address];
+        return (
+            ins.id,
+            ins.name,
+            ins.contact,
+            ins.location,
+            ins.addr,
+            ins.licenseno
+            //ins.isApproved
+        );
+    }
+
+    
+
+    //add researchers
+    function addResearcher(
+        string memory _name,
+        string memory _affiliation,
+        string memory _contact,
+        uint256 license
+    ) public {
+        require(!isResearcher[msg.sender], "A");
+        require(
+            msg.sender != owner,
+            "U"
+        );
+        require(bytes(_name).length > 0);
+        require(bytes(_contact).length > 0);
+        require(license > 0);
+        address _addr = msg.sender;
+        //researcherList.push(_addr);
+
+        rindex = rindex + 1;
+        isResearcher[_addr] = true;
+        researchers[_addr].id = rindex;
+        researchers[_addr].name = _name;
+        researchers[_addr].contact = _contact;
+        researchers[_addr].affiliation = _affiliation;
+        researchers[_addr].addr = _addr;
+        //researchers[_addr].isApproved = false;
+
+        //Registered[resname][resid] = true;
+        //registeredResearcherList.push(resid);
+    }
+
+    //get researcher details using eth address
+    function getResearcherDetails(
+        address _address
+    )
+        public
+        view
+        returns (
+            uint256 id,
+            string memory name,
+            string memory contact,
+            string memory affiliation,
+            address addr,
+            uint256 licenseno
+            //bool isApproved
+        )
+    {
+        researcher memory resch = researchers[_address];
+        return (
+            resch.id,
+            resch.name,
+            resch.contact,
+            resch.affiliation,
+            resch.addr,
+            resch.licenseno
+            //resch.isApproved
+        );
+    }
+
+
+
+
+
+    //Add records of the patient
+    function addRecord(
+        string memory _uName,
+        string memory _reason,
+        string memory _visitedDate,
+        string memory _summary,
+        //string memory _ipfs,
+        address addr
+    ) public {
+        require(isPatient[addr], "E");
+
+        if (Authorized[addr][msg.sender] || msg.sender == addr) {
+            patients[addr].records.push(
+                Records(_uName, _reason, _visitedDate, _summary)
+            );
+        } else revert("E");
+    }
+    
+
+     //get patients record by Patient
+    function getPatientRecordsbyP() 
+   public view returns (
+   string[] memory, 
+   string[] memory, 
+   string[] memory, 
+   string[] memory) {
+        uint256 recordCount = patients[msg.sender].records.length;
+
+        string[] memory unames = new string[](recordCount);
+        string[] memory reasons = new string[](recordCount);
+        string[] memory visitedDates = new string[](recordCount);
+        string[] memory summaries = new string[](recordCount);
+        //string[] memory ipfss = new string[](recordCount);
+
+        for (uint256 i = 0; i < recordCount; i++) {
+            Records memory record = patients[msg.sender].records[i];
+            unames[i] = record.uName;
+            reasons[i] = record.reason;
+            visitedDates[i] = record.visitedDate;
+            summaries[i] = record.summary;
+            //ipfss[i] = record.ipfs;
+        }
+
+        return (unames, reasons, visitedDates, summaries);
+ }
+
+    //get patient Records
+
+   function getPatientRecords(address _addr) 
+   public view returns (
+   string[] memory, 
+   string[] memory, 
+   string[] memory, 
+   string[] memory) {
+    require(isPatient[_addr], "E");
+
+    if (Authorized[_addr][msg.sender]) {
+        uint256 recordCount = patients[_addr].records.length;
+
+        string[] memory unames = new string[](recordCount);
+        string[] memory reasons = new string[](recordCount);
+        string[] memory visitedDates = new string[](recordCount);
+        string[] memory summaries = new string[](recordCount);
+        //string[] memory ipfss = new string[](recordCount);
+
+        for (uint256 i = 0; i < recordCount; i++) {
+            Records memory record = patients[_addr].records[i];
+            unames[i] = record.uName;
+            reasons[i] = record.reason;
+            visitedDates[i] = record.visitedDate;
+            summaries[i] = record.summary;
+            //ipfss[i] = record.ipfs;
+        }
+
+        return (unames, reasons, visitedDates, summaries);
+    } else {
+        revert("E");
+    }
+ }
+
+    //Give access to certain address
+    function grantAccess(address _addr) public returns (bool success) {
+        require(msg.sender != _addr, "U");
+        require(isDoctor[_addr]  || isPharmacy[_addr] || isLaboratory[_addr] || isInsurance[_addr] || isResearcher[_addr], "E");//Is grant access only for dotor
+        require(!Authorized[msg.sender][_addr], "A");
+        Authorized[msg.sender][_addr] = true;
+        return true;
+    }
+
+    //Revoke access of patient records from certain address
+    function revokeAccess(address _addr) public returns (bool success) {
+        require(msg.sender != _addr, "U");
+        require(Authorized[msg.sender][_addr], "U");
+        Authorized[msg.sender][_addr] = false;
+        return true;
+    }
+
+
+
+    //Patient LogIn
+    function patientLogin(
+    string memory _name,
+    string memory _password
+) public {
+    if (
+        keccak256(bytes(patients[msg.sender].name)) == keccak256(bytes(_name)) 
+        && keccak256(bytes(patients[msg.sender].password)) == keccak256(bytes(_password))
+    ) {
+         loggedIn[msg.sender] = true;
+         emit PatientLogIn(msg.sender, _name);
+    } else{
+        revert ('E'); 
+    }
+}
+    
+     //Doctor LogIn
+    function doctorLogin(
+        string memory _name,
+        uint256 _license
+    ) public {
+        if (
+        keccak256(bytes(doctors[msg.sender].name)) == keccak256(bytes(_name)) 
+        && doctors[msg.sender].licenseno == _license
+    ) {
+         loggedIn[msg.sender] = true;
+         emit DoctorLogIn(msg.sender, _name);
+    }  else {
+        revert ("E"); 
+    }
+    }
+    
+    //Pharmacy LogIn
+    function pharmacyLogin(
+        string memory _name,
+        uint256 _license
+    ) public {
+        if (
+        keccak256(bytes(pharmacies[msg.sender].name)) == keccak256(bytes(_name)) 
+        && pharmacies[msg.sender].licenseno == _license
+    ) {
+         loggedIn[msg.sender] = true;
+         emit PharmacyLogIn(msg.sender, _name);
+    }  else {
+        revert ("E"); 
+    }
+    }
+    
+    //Laboratory LogIn
+    function laboratoryLogin(
+        string memory _name,
+        uint256 _license
+    ) public {
+        if (
+        keccak256(bytes(laboratories[msg.sender].name)) == keccak256(bytes(_name)) 
+        && laboratories[msg.sender].licenseno == _license
+    ) {
+         loggedIn[msg.sender] = true;
+         emit LaboratoryLogIn(msg.sender, _name);
+    }  else {
+        revert ("E"); 
+    }
+    }
+    
+    //Insurance Company Login
+    function insuranceLogin(
+        string memory _name,
+        uint256 _license
+    ) public {
+        if (
+        keccak256(bytes(insurances[msg.sender].name)) == keccak256(bytes(_name)) 
+        && insurances[msg.sender].licenseno == _license
+    ) {
+         loggedIn[msg.sender] = true;
+         emit InsuranceLogIn(msg.sender, _name);
+    }  else {
+        revert ("E"); 
+    }
+    }
+    
+    //Researcher Login
+    function researcherLogin(
+        string memory _name,
+        uint256 _license
+    ) public {
+        if (
+        keccak256(bytes(researchers[msg.sender].name)) == keccak256(bytes(_name)) 
+        && researchers[msg.sender].licenseno == _license
+    ) {
+         loggedIn[msg.sender] = true;
+         emit ResearcherLogIn(msg.sender, _name);
+    }  else {
+        revert ("E"); 
+    }
+    }
+    
+    //LogOut
+    function logOut() public {
+
+        if(loggedIn[msg.sender] == true){
+               loggedIn[msg.sender] = false;
+               emit LogOut(msg.sender);
+        }
+    } 
+
+}

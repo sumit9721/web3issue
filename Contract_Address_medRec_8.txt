@@ -1,0 +1,75 @@
+Compiled 1 Solidity file successfully
+ deployed to 0xC240a2BEF01B1F7Db5f487730384A0552F9562DF
+
+Owner Address:
+ACCOUNT ADDRESS (5)
+0x20e5C58E7ED9Bb18a5c7643A70393c361fD40132
+PRIVATE KEY
+0xde72b62e99d44c2849b08ce117f8b0f2e8ae1a23ea083f01f3c135a1aef784b1
+
+
+
+
+
+
+
+
+
+Addresses for the Test:
+
+
+
+FOR PATIENTS:
+
+ACCOUNT ADDRESS (0)
+0x7EdC2b0bF92e54459b7758cfC3079F29050D8A65
+PRIVATE KEY
+0xb5e28891fe2a5fca056f6b5cca4debbcc6927faab3c736b9c7799f767270973f
+
+
+Patient 1:
+Shyam Pandey
+9856485248
+Male
+1995/2/6
+Shyam_1234
+
+
+
+Doctor 1:
+Hari Yadav
+1457895
+Green City
+General Practitioner 
+9842659874
+
+
+
+
+
+FOR DOCTORS:
+
+ACCOUNT ADDRESS(1)
+0xbE8acDC2E1f772a13127361C7A85bF6Ff5E99c01
+PRIVATE KEY
+0x8d96f253c1947c6d5dae6cccd6c2fb9026f6fcb50e0cbbb14d599196e98bd659
+
+
+Doctor 2:
+
+Surya Karki
+6354789
+Good Health Hospital
+General Practitioner 
+9846845975
+
+
+
+
+
+
+
+
+
+
+ git config --global core.autocrlf true
